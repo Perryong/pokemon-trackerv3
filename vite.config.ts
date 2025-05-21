@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 // Complete Vite configuration for GitHub Pages
 export default defineConfig({
   // 👇 MUST match the repo name (including the leading and trailing slashes)
-  base: '/image-gallery/',
+  base: '/pokemon-trackerv3/',
 
   plugins: [react()],
 
