@@ -29,6 +29,8 @@ const PocketTCG: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [obtainedCards, setObtainedCards] = useState<Set<string>>(new Set());
   const [collapsedSeries, setCollapsedSeries] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Load obtained cards from localStorage
@@ -44,9 +46,22 @@ const PocketTCG: React.FC = () => {
     }
 
     // Load card data
-    fetch('/data/pokemons.json')
-      .then(response => response.json())
-      .then(data => setSeries(data));
+    fetch(`${import.meta.env.BASE_URL}data/pokemons.json`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch pokemons.json: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        setSeries(data);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading pokemons.json:', error);
+        setError(error.message);
+        setIsLoading(false);
+      });
   }, []);
 
   const toggleCardObtained = (cardId: string) => {
@@ -75,17 +90,39 @@ const PocketTCG: React.FC = () => {
     });
   };
 
-  const filteredSeries = series.map(s => ({
-    ...s,
-    cards: s.cards.filter(card => 
-      card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      card.number.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  })).filter(s => s.cards.length > 0);
+  const filteredSeries = series
+    .map(s => ({
+      ...s,
+      cards: s.cards.filter(card => 
+        card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.number.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    }))
+    .filter(s => s.cards.length > 0);
 
   const getSeriesObtainedCount = (s: Series) => {
     return s.cards.filter(card => obtainedCards.has(`${s.codename}-${card.number}`)).length;
   };
+
+  if (isLoading) {
+    return <div className="container mx-auto p-4">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-4 text-red-500">
+        Error: {error}
+      </div>
+    );
+  }
+
+  if (filteredSeries.length === 0 && !searchTerm) {
+    return (
+      <div className="container mx-auto p-4">
+        No card data available. Please check the data source.
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -123,7 +160,7 @@ const PocketTCG: React.FC = () => {
             >
               <div className="flex items-center gap-4">
                 <img 
-                  src={`/images/logos/${s.seriesName.toLowerCase().replace(/ /g, '-')}.webp`}
+                  src={`${import.meta.env.BASE_URL}images/logos/${s.seriesName.toLowerCase().replace(/ /g, '-')}.webp`}
                   alt={`${s.seriesName} logo`}
                   className="h-8"
                 />
@@ -145,7 +182,7 @@ const PocketTCG: React.FC = () => {
                 {s.cards.map((card) => {
                   const cardId = `${s.codename}-${card.number}`;
                   const isObtained = obtainedCards.has(cardId);
-                  const imagePath = `/images/cards/${s.seriesName.toLowerCase().replace(/ /g, '-')}/${card.number}-${card.name.replace(/ /g, '-')}-${s.seriesName.replace(/ /g, '-')}.webp`;
+                  const imagePath = `${import.meta.env.BASE_URL}images/cards/${s.seriesName.toLowerCase().replace(/ /g, '-')}/${card.number}-${card.name.replace(/ /g, '-')}-${s.seriesName.replace(/ /g, '-')}.webp`;
                   
                   return (
                     <Card 
