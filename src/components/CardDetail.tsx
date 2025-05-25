@@ -7,18 +7,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
-  Heart,
-  Share2,
   DollarSign,
   CheckCircle,
   XCircle,
   Star,
   AlertCircle,
-  Zap,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import React, { useState } from 'react';
 import { PokemonCard } from '@/lib/api';
 import { useCollection } from '@/lib/collection';
