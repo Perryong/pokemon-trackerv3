@@ -9,6 +9,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  base: '/pokemon-trackerv3/', // Set base to repository name
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
